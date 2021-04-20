@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -16,11 +17,15 @@ import (
 
 func main() {
 	// logging conf
+	logpath := filepath.Join(".", "log")
+	_ = os.MkdirAll(logpath, os.ModePerm)
 	f, err := os.OpenFile("log/grpcox.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		log.Fatalf("error opening log file for writing: %v", err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 	log.SetOutput(f)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -31,7 +36,7 @@ func main() {
 	}
 	muxRouter := mux.NewRouter()
 	handler.Init(muxRouter)
-	var wait time.Duration = time.Second * 15
+	var wait = time.Second * 15
 
 	srv := &http.Server{
 		Addr:         addr,
@@ -64,7 +69,7 @@ func main() {
 		log.Printf("error while removing protos: %s", err.Error())
 	}
 
-	srv.Shutdown(ctx)
+	_ = srv.Shutdown(ctx)
 	log.Println("shutting down")
 	os.Exit(0)
 }
