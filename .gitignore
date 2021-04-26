@@ -1,5 +1,12 @@
-grpcox
-log
+
+# vue.js
+node_modules
+/dist
+
+# go output
 *.out
-vendor/
+grpcox
+grpcox.exe
+
+# IDEs
 .idea

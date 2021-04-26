@@ -3,45 +3,45 @@
 
 turn [gRPCurl](https://github.com/fullstorydev/grpcurl) into web based UI, extremely easy to use
 
-## Features
-- Recognize and provide list of services and methods inside it as an options.
-- Automatically recognize schema input and compose it into JSON based. (ensure your gRPC server supports [server reflection](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1alpha/reflection.proto)). Examples for how to set up server reflection can be found [here](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md#known-implementations).
-- Save established connection, and reuse it for next invoke/request (also can close/restart connection)
+This fork [kgb-financial-com/grpcox](https://github.com/kgb-financial-com/grpcox) extends
+the original with the option to pre-define connection targets, and to select a new or
+existing target via html parameters. It also comes with a new frontend, written in
+[vue.js](https://vuejs.org/).
 
-## Installation
-### Docker
-```shell
-docker pull gusaul/grpcox:latest
-```
-then run
-```shell
-docker run -p 6969:6969 -v {ABSOLUTE_PATH_TO_LOG}/log:/log -d gusaul/grpcox
-```
+## Extensions for financial.com
 
-### Docker Compose
-from terminal, move to grpcox directory, then run command
-```shell
-docker-compose up
-```
-if you're using docker and want to connect gRPC on your local machine, then use
-<br/>`host.docker.internal:<your gRPC port>` instead of `localhost`
+### Integration of vue.js
 
-### Golang
-if you have golang installed on your local machine, just run command
-```shell
-make start
-```
-from grpcox directory
+With node.js installed, vue-cli installed (using `npm install -g @vue/cli`),
+and from the project directory, 
+the following steps have been performed in order to integrate vue.js:
 
-configure app preferences by editing `config.env` file
+* Issue the command `vue create grpcox` (choosing vue 3 when asked)
+* Remove `README.md` and `.gitignore` from the newly created directory `grpcox`. Add
+  entries as required to the project directory `.gitignore`.
+* Move all files and directories from `grpcox` one level up, and delete the 
+  then-empty directory.
+  
+The directories `src` and `public` now contain some Vue.js *Hello World* application.
+We are rewriting it according to our needs. We also change `routes.go` such that instead
+of `/index` directory, our go software will use `/dist` as the source for our html pages.
+Now, we can develop the frontend by starting it the usual way using `npm run serve`.
 
-| var             | usage                                       | type   | unit   |
-|-----------------|---------------------------------------------|--------|--------|
-| MAX_LIFE_CONN   | maximum idle time connection before closed  | number | minute |
-| TICK_CLOSE_CONN | ticker interval to sweep expired connection | number | second |
-| BIND_ADDR       | ip:port to bind service                     | string |  |
+The frontend should use different URLs to access the server endpoints, depending on how
+it has been launched.
+* When launched in development mode, with `npm run serve`, it should access a go server
+which is running in parallel, usually on `http://localhost:6969/`.
+* In all other cases, it should assume that it has been launched from the go server,
+so it should dynamically use its own URL also for calling endpoints.
+This is achieved by defining a file `.env.development`.
+  
+## Build
 
-set value `0 (zero)` to disable auto close idle connection.
+To build the frontend (vue.js) part for production, issue
+```npm run build```
 
-## Demo
-![gRPCox Demo](https://raw.githubusercontent.com/gusaul/grpcox/master/index/img/demogrpcox.gif)
+To build the go server afterwards, issue
+```docker build -t docker-hosted.financial.com/bb/grpcox:latest .```
+
+To run the docker image, issue
+```docker run -p 6969:6969 docker-hosted.financial.com/bb/grpcox:latest```
