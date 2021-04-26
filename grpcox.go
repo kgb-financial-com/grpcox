@@ -2,12 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -16,18 +14,6 @@ import (
 )
 
 func main() {
-	// logging conf
-	logpath := filepath.Join(".", "log")
-	_ = os.MkdirAll(logpath, os.ModePerm)
-	f, err := os.OpenFile("log/grpcox.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening log file for writing: %v", err)
-	}
-	defer func(f *os.File) {
-		_ = f.Close()
-	}(f)
-	log.SetOutput(f)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// start app
 	addr := "0.0.0.0:6969"
@@ -46,7 +32,7 @@ func main() {
 		Handler:      muxRouter,
 	}
 
-	fmt.Println("Service started on", addr)
+	log.Println("Service started on", addr)
 	go func() {
 		log.Fatal(srv.ListenAndServe())
 	}()
@@ -64,7 +50,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 
-	err = removeProtos()
+	err := removeProtos()
 	if err != nil {
 		log.Printf("error while removing protos: %s", err.Error())
 	}
