@@ -45,3 +45,9 @@ To build the go server afterwards, issue
 
 To run the docker image, issue
 ```docker run -p 6969:6969 docker-hosted.financial.com/bb/grpcox:latest```
+
+Please note that the image name `docker-hosted.financial.com/bb/grpcox` contains the
+name of financial.com internal docker registry host. The commands above do not actually
+contact that server, so they should work for you even if you do not have access to
+financial.com internal network. However, `docker push` will certainly fail in that case,
+so you might want to change the host and image name to values which suit your needs.
