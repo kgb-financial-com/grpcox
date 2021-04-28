@@ -64,7 +64,7 @@ export default {
 
   watch: {
     selectedHostInList(newValue) {
-      this.$store.commit("selectHost", "<unknown>", newValue)
+      this.$store.commit("selectHost", {name: "<unknown>", host: newValue})
     },
     selectedServiceInList(newValue) {
       this.$store.commit("selectService", newValue)
@@ -94,6 +94,7 @@ export default {
     },
 
     refreshHostList(name, host) {
+
       axios.get(this.$store.state.urlBase + "server/" + encodeURIComponent(host) + "/services")
           .then(data => {
             if (!data?.data?.data) {

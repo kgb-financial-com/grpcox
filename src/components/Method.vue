@@ -1,66 +1,71 @@
 <template>
-  <div class="methodContainer">
-    <Method v-for="method in methods" :key="method" :name="method"/>
-  </div>
+  <div> &gt;&gt; {{ shortName }}</div>
+  <div>{{ methodDescription.schema }}</div>
+  <div>{{ methodDescription.template }}</div>
 </template>
 
 <script>
 import axios from "axios";
-import Method from "@/components/Method";
 
 export default {
-  name: "MethodContainer",
+
+  name: "Method",
+
+  props: {
+    name: String
+  },
 
   data: function() {
     return {
-      methods: []
+      methodDescription: {},
+      errorMessage: null
     }
   },
 
-  components: { Method },
-
   computed: {
+    shortName() {
+      const words = this.name.split(".");
+      return words[words.length - 1];
+    },
     selectedName() {
       return this.$store.state.selectedHost.name;
     },
     selectedHost() {
       return this.$store.state.selectedHost.host;
     },
-    selectedService() {
-      return this.$store.state.selectedService;
-    }
   },
 
   watch:{
     selectedService() {
-      this.refreshMethodList();
+      this.refreshMethodDetails();
     }
   },
 
   created() {
-    this.refreshMethodList();
+    this.refreshMethodDetails();
   },
 
   methods: {
 
-    refreshMethodList() {
+    refreshMethodDetails() {
 
-      if (!this.selectedService) {
+      if (!this.selectedHost) {
         return;
       }
 
-      axios.get(this.$store.state.urlBase + "server/" + this.selectedHost + "/service/" + this.selectedService + "/functions")
+      axios.get(this.$store.state.urlBase + "server/" + this.selectedHost + "/function/" + this.name + "/describe")
           .then(data => {
             if (!data?.data?.data) {
               throw "Could not connect to host: " + this.selectedHost;
             }
-            this.methods = data.data.data;
+            this.methodDescription = data.data.data;
           })
           .catch(err => this.errorMessage = "Could not connect to server " + this.selectedName + "(" + this.selectedHost + "): " + err)
 
     }
 
   }
+
 }
 </script>
 
