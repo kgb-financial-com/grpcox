@@ -1,11 +1,21 @@
 <template>
   <div> &gt;&gt; {{ shortName }}</div>
   <div>{{ methodDescription.schema }}</div>
-  <div>{{ methodDescription.template }}</div>
+  <div>
+    <v-ace-editor
+        v-model:value="methodDescription.template"
+        lang="json"
+        theme="chrome"
+        style="height: 300px; width: 300px;"
+    />
+  </div>
 </template>
 
 <script>
 import axios from "axios";
+import { VAceEditor } from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-chrome';
 
 export default {
 
@@ -15,9 +25,14 @@ export default {
     name: String
   },
 
+  components: { VAceEditor },
+
   data: function() {
     return {
-      methodDescription: {},
+      methodDescription: {
+        schema: "",
+        template: ""
+      },
       errorMessage: null
     }
   },
