@@ -16,6 +16,11 @@ const store = new Vuex.Store({
             name: urlParams.get('name'),
             host: urlParams.get('host')
         }
+    },
+    mutations: {
+        selectHost(state, name, host) {
+            state.selectedHost = { name, host };
+        }
     }
 });
 
