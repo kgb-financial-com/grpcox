@@ -65,6 +65,9 @@ export default {
   watch: {
     selectedHostInList(newValue) {
       this.$store.commit("selectHost", "<unknown>", newValue)
+    },
+    selectedServiceInList(newValue) {
+      this.$store.commit("selectService", newValue)
     }
   },
 

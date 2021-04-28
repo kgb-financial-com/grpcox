@@ -15,11 +15,15 @@ const store = new Vuex.Store({
         selectedHost: {
             name: urlParams.get('name'),
             host: urlParams.get('host')
-        }
+        },
+        selectedService: null
     },
     mutations: {
         selectHost(state, name, host) {
             state.selectedHost = { name, host };
+        },
+        selectService(state, name) {
+            state.selectedService = name;
         }
     }
 });
