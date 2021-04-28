@@ -1,21 +1,33 @@
 <template>
-  <div> &gt;&gt; {{ shortName }}</div>
-  <div>{{ methodDescription.schema }}</div>
-  <div>
-    <v-ace-editor
-        v-model:value="methodDescription.template"
-        lang="json"
-        theme="chrome"
-        style="height: 300px; width: 300px;"
-    />
+  <div class="outer">
+    <label :for="idMethod">Method: {{ shortName }}</label>
+    <div class="method" :id="idMethod">
+      <div :id="idEditor" class="formatContainer">
+        <label :for="idEditor">Edit Input Parameters</label>
+        <div class="ace-container">
+        <v-ace-editor
+            v-model:value="methodDescription.template"
+            lang="json"
+            theme="chrome"
+            :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false }"
+        />
+        </div>
+      </div>
+      <div :id="idSchema" class="formatContainer">
+        <label :for="idSchema">Schema</label>
+        <pre ref="prettifiedMethodDescription">{{ methodDescription.schema }}</pre>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { VAceEditor } from 'vue3-ace-editor';
+import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-chrome';
+
+const prettyPrint = require('code-prettify');
 
 export default {
 
@@ -25,9 +37,9 @@ export default {
     name: String
   },
 
-  components: { VAceEditor },
+  components: {VAceEditor},
 
-  data: function() {
+  data: function () {
     return {
       methodDescription: {
         schema: "",
@@ -48,11 +60,24 @@ export default {
     selectedHost() {
       return this.$store.state.selectedHost.host;
     },
+    idMethod() {
+      return this.name + "-method";
+    },
+    idEditor() {
+      return this.name + "-editor";
+    },
+    idSchema() {
+      return this.name + "-schema";
+    }
   },
 
-  watch:{
+  watch: {
     selectedService() {
       this.refreshMethodDetails();
+    },
+    methodDescription() {
+      this.$refs.prettifiedMethodDescription.classList = ["prettyprint"];
+      this.$nextTick(() => prettyPrint.prettyPrint());
     }
   },
 
@@ -85,5 +110,48 @@ export default {
 </script>
 
 <style scoped>
+
+.outer {
+  border: solid 1px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.method {
+  display: flex;
+}
+
+.formatContainer {
+  border: solid 1px;
+  padding: 10px;
+  margin: 10px;
+  flex: 1 1 0;
+}
+.formatContainer:first-child {
+  margin-left: 0;
+}
+.formatContainer:last-child {
+  margin-left: 0;
+}
+
+.ace-container {
+  margin-top: 5px;
+  padding-top: 10px;
+  border-top: solid 1px;
+}
+
+</style>
+
+<style>
+
+.ace_editor {
+  height: 300px;
+}
+
+.prettyprint {
+  margin-top: 5px;
+  padding-top: 10px;
+  border-top: solid 1px;
+}
 
 </style>
