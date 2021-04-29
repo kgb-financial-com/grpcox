@@ -105,7 +105,7 @@ export default {
                 .filter(s => !s.startsWith("grpc."))
             this.selectedServiceInList = this.selectFirst(this.currentServices);
           })
-          .catch(err => this.errorMessage = "Could not connect to server " + name + "(" + host + "): " + err)
+          .catch(err => this.errorMessage = "Could not connect to server " + name + " (" + host + "): " + err)
           .finally(() => axios.get(this.$store.state.urlBase + "active/get")
               .then(data => {
                 this.availableHosts = data.data.data;

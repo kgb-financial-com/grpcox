@@ -1,23 +1,34 @@
 <template>
   <div class="outer">
-    <label :for="idMethod">Method: {{ shortName }}</label>
-    <div class="method" :id="idMethod">
-      <div :id="idEditor" class="formatContainer">
-        <label :for="idEditor">Edit Input Parameters</label>
+    <div class="error" v-if="!!errorMessage">{{ errorMessage }}</div>
+    <div class="row">
+      <button @click="executeMethod">Execute</button>
+      <label :for="id('method')">Method <span class="bold">{{ shortName }}</span></label>
+    </div>
+    <div class="method" :id="id('method')">
+      <div :id="id('editor')" class="formatContainer">
+        <label :for="id('editor')">Edit Input Parameters</label>
         <div class="ace-container">
-        <v-ace-editor
-            v-model:value="methodDescription.template"
-            lang="json"
-            theme="chrome"
-            :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false }"
-        />
+          <v-ace-editor
+              v-model:value="methodDescription.template"
+              lang="json"
+              theme="chrome"
+              :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false }"
+          />
         </div>
       </div>
-      <div :id="idSchema" class="formatContainer">
-        <label :for="idSchema">Schema</label>
+      <div :id="id('schema')" class="formatContainer">
+        <label :for="id('schema')">Schema</label>
         <pre ref="prettifiedMethodDescription">{{ methodDescription.schema }}</pre>
       </div>
     </div>
+    <div v-if="!!receivedResult">
+      <label :for="id('result')">Result <span class="result-title-details">received at ... , request took ... ms</span></label>
+      <div class="result" :id="id('result')">
+        {{ receivedResult }}
+      </div>
+    </div>
+    <div class="error" v-if="!!receiveErrorMessage">{{ receiveErrorMessage }}</div>
   </div>
 </template>
 
@@ -45,7 +56,9 @@ export default {
         schema: "",
         template: ""
       },
-      errorMessage: null
+      errorMessage: null,
+      receivedResult: null,
+      receiveErrorMessage: null
     }
   },
 
@@ -59,15 +72,6 @@ export default {
     },
     selectedHost() {
       return this.$store.state.selectedHost.host;
-    },
-    idMethod() {
-      return this.name + "-method";
-    },
-    idEditor() {
-      return this.name + "-editor";
-    },
-    idSchema() {
-      return this.name + "-schema";
     }
   },
 
@@ -102,6 +106,26 @@ export default {
           })
           .catch(err => this.errorMessage = "Could not connect to server " + this.selectedName + "(" + this.selectedHost + "): " + err)
 
+    },
+
+    executeMethod() {
+      this.receivedResult = null;
+      this.receiveErrorMessage = null;
+      axios.post(this.$store.state.urlBase + "server/" + this.selectedHost + "/function/" + this.name + "/invoke", this.methodDescription.template)
+          .then(data => {
+            if (data?.data?.error) {
+              throw data.data.error;
+            }
+            if (!data?.data?.data) {
+              throw "No data received";
+            }
+            this.receivedResult = data.data.data;
+          })
+          .catch(err => this.receiveErrorMessage = "Could not execute method on server " + this.selectedName + " (" + this.selectedHost + "): " + err)
+    },
+
+    id(kind) {
+      return this.name + "-" + kind;
     }
 
   }
@@ -127,9 +151,11 @@ export default {
   margin: 10px;
   flex: 1 1 0;
 }
+
 .formatContainer:first-child {
   margin-left: 0;
 }
+
 .formatContainer:last-child {
   margin-left: 0;
 }
@@ -140,12 +166,34 @@ export default {
   border-top: solid 1px;
 }
 
+label {
+  font-size: larger;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.row {
+  display: inline;
+}
+
+.row button {
+  margin: 1px 10px 0 0;
+}
+
+.error {
+  border: solid 1px;
+  padding: 10px;
+  background-color: #ffd0d0;
+}
+
 </style>
 
 <style>
 
 .ace_editor {
-  height: 300px;
+  height: 250px;
 }
 
 .prettyprint {
