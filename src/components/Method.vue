@@ -32,7 +32,11 @@
       </div>
     </div>
     <div :id="id('result')" class="formatContainer" v-if="!!receivedResult">
-      <label :for="id('result')">Result <span class="result-title-details">received at ... , request took ... ms</span></label>
+      <label :for="id('result')">
+        Result <span class="result-title-details">
+        received at {{ receivedDateString }},
+        request took {{ requestMillis }} ms</span>
+      </label>
       <div class="ace-container">
         <v-ace-editor
             v-model:value="receivedResult"
@@ -71,7 +75,9 @@ export default {
       },
       errorMessage: null,
       receivedResult: null,
-      receiveErrorMessage: null
+      receiveErrorMessage: null,
+      receivedDate: null,
+      requestMillis: 0,
     }
   },
 
@@ -85,6 +91,12 @@ export default {
     },
     selectedHost() {
       return this.$store.state.selectedHost.host;
+    },
+    receivedDateString() {
+      if (!this.receivedDate?.toLocaleDateString) {
+        return null;
+      }
+      return this.receivedDate.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
     }
   },
 
@@ -120,6 +132,7 @@ export default {
     executeMethod() {
       this.receivedResult = null;
       this.receiveErrorMessage = null;
+      const startDate = Date.now();
       axios.post(this.$store.state.urlBase + "server/" + this.selectedHost + "/function/" + this.name + "/invoke", this.methodDescription.template)
           .then(data => {
             if (data?.data?.error) {
@@ -129,6 +142,9 @@ export default {
               throw "No data received";
             }
             this.receivedResult = data.data.data.result;
+            const now = Date.now();
+            this.requestMillis = now - startDate;
+            this.receivedDate = new Date(now);
           })
           .catch(err => this.receiveErrorMessage = "Could not execute method on server " + this.selectedName + " (" + this.selectedHost + "): " + err)
     },
