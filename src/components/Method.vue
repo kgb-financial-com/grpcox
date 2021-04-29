@@ -13,19 +13,34 @@
               v-model:value="methodDescription.template"
               lang="json"
               theme="chrome"
-              :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false }"
+              style="height: inherit"
+              :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false, highlightGutterLine: false }"
           />
         </div>
       </div>
       <div :id="id('schema')" class="formatContainer">
         <label :for="id('schema')">Schema</label>
-        <pre ref="prettifiedMethodDescription">{{ methodDescription.schema }}</pre>
+        <div class="ace-container">
+          <v-ace-editor
+              v-model:value="methodDescription.schema"
+              lang="json"
+              theme="chrome"
+              style="height: inherit"
+              :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false, readOnly: true, highlightGutterLine: false }"
+          />
+        </div>
       </div>
     </div>
-    <div v-if="!!receivedResult">
+    <div :id="id('result')" class="formatContainer" v-if="!!receivedResult">
       <label :for="id('result')">Result <span class="result-title-details">received at ... , request took ... ms</span></label>
-      <div class="result" :id="id('result')">
-        {{ receivedResult }}
+      <div class="ace-container">
+        <v-ace-editor
+            v-model:value="receivedResult"
+            lang="json"
+            theme="chrome"
+            style="height: inherit"
+            :options="{ showLineNumbers: false, showPrintMargin: false, highlightActiveLine: false, readOnly: true, highlightGutterLine: false }"
+        />
       </div>
     </div>
     <div class="error" v-if="!!receiveErrorMessage">{{ receiveErrorMessage }}</div>
@@ -37,8 +52,6 @@ import axios from "axios";
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-chrome';
-
-const prettyPrint = require('code-prettify');
 
 export default {
 
@@ -79,10 +92,6 @@ export default {
     selectedService() {
       this.refreshMethodDetails();
     },
-    methodDescription() {
-      this.$refs.prettifiedMethodDescription.classList = ["prettyprint"];
-      this.$nextTick(() => prettyPrint.prettyPrint());
-    }
   },
 
   created() {
@@ -116,10 +125,10 @@ export default {
             if (data?.data?.error) {
               throw data.data.error;
             }
-            if (!data?.data?.data) {
+            if (!data?.data?.data?.result) {
               throw "No data received";
             }
-            this.receivedResult = data.data.data;
+            this.receivedResult = data.data.data.result;
           })
           .catch(err => this.receiveErrorMessage = "Could not execute method on server " + this.selectedName + " (" + this.selectedHost + "): " + err)
     },
@@ -164,6 +173,7 @@ export default {
   margin-top: 5px;
   padding-top: 10px;
   border-top: solid 1px;
+  height: 250px;
 }
 
 label {
@@ -186,20 +196,6 @@ label {
   border: solid 1px;
   padding: 10px;
   background-color: #ffd0d0;
-}
-
-</style>
-
-<style>
-
-.ace_editor {
-  height: 250px;
-}
-
-.prettyprint {
-  margin-top: 5px;
-  padding-top: 10px;
-  border-top: solid 1px;
 }
 
 </style>

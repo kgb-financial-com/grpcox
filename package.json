@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "code-prettify": "git://github.com/google/code-prettify.git#master",
     "core-js": "^3.6.5",
     "save": "^2.4.0",
     "vue": "^3.0.0",
