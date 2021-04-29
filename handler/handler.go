@@ -25,7 +25,7 @@ func InitHandler() *Handler {
 }
 
 func (h *Handler) getActiveConns(w http.ResponseWriter, r *http.Request) {
-	response(w, h.g.GetActiveConns(context.TODO()))
+	response(w, h.g.GetActiveConns())
 }
 
 func (h *Handler) closeActiveConns(w http.ResponseWriter, r *http.Request) {

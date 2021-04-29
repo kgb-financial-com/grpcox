@@ -86,11 +86,8 @@ export default {
       const words = this.name.split(".");
       return words[words.length - 1];
     },
-    selectedName() {
-      return this.$store.state.selectedHost.name;
-    },
     selectedHost() {
-      return this.$store.state.selectedHost.host;
+      return this.$store.state.selectedHost;
     },
     receivedDateString() {
       if (!this.receivedDate?.toLocaleDateString) {
@@ -121,11 +118,11 @@ export default {
       axios.get(this.$store.state.urlBase + "server/" + this.selectedHost + "/function/" + this.name + "/describe")
           .then(data => {
             if (!data?.data?.data) {
-              throw "Could not connect to host: " + this.selectedHost;
+              throw "Could not connect to host: " + this.selectedHost.split('|')[1];
             }
             this.methodDescription = data.data.data;
           })
-          .catch(err => this.errorMessage = "Could not connect to server " + this.selectedName + "(" + this.selectedHost + "): " + err)
+          .catch(err => this.errorMessage = "Could not connect to server " + this.selectedName.split('|')[0] + "(" + this.selectedHost.split('|')[1] + "): " + err)
 
     },
 
@@ -146,7 +143,7 @@ export default {
             this.requestMillis = now - startDate;
             this.receivedDate = new Date(now);
           })
-          .catch(err => this.receiveErrorMessage = "Could not execute method on server " + this.selectedName + " (" + this.selectedHost + "): " + err)
+          .catch(err => this.receiveErrorMessage = "Could not execute method on server " + this.selectedName.split('|')[0] + " (" + this.selectedHost.split('|')[1] + "): " + err)
     },
 
     id(kind) {

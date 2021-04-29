@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fullstorydev/grpcurl"
@@ -71,7 +72,7 @@ func (g *GrpCox) GetResource(ctx context.Context, target string, plainText, isRe
 		if !isRestartConn && conn.isValid() {
 			return conn, nil
 		}
-		g.CloseActiveConns(target)
+		_ = g.CloseActiveConns(target)
 	}
 
 	var err error
@@ -108,7 +109,7 @@ func (g *GrpCox) GetResourceWithProto(ctx context.Context, target string, plainT
 }
 
 // GetActiveConns - get all saved active connection
-func (g *GrpCox) GetActiveConns(ctx context.Context) []string {
+func (g *GrpCox) GetActiveConns() []string {
 	active := g.activeConn.getAllConn()
 	result := make([]string, len(active))
 	i := 0
@@ -173,7 +174,14 @@ func (g *GrpCox) dial(ctx context.Context, target string, plainText bool) (*grpc
 	if g.isUnixSocket != nil && g.isUnixSocket() {
 		network = "unix"
 	}
-	cc, err := grpcurl.BlockingDial(ctx, network, target, creds, opts...)
+
+	host := target
+	targetDef := strings.Split(target, "|")
+	if len(targetDef) > 1 {
+		host = targetDef[1]
+	}
+
+	cc, err := grpcurl.BlockingDial(ctx, network, host, creds, opts...)
 	if err != nil {
 		return nil, err
 	}

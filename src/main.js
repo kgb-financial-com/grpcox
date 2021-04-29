@@ -13,16 +13,13 @@ const store = createStore({
     state() {
         return {
             urlBase: getUrlBase(),
-            selectedHost: {
-                name: urlParams.get('name'),
-                host: urlParams.get('host')
-            },
+            selectedHost: urlParams.get('name') + '|' + urlParams.get('host'),
             selectedService: null
         }
     },
     mutations: {
-        selectHost(state, {name, host}) {
-            state.selectedHost = { name, host };
+        selectHost(state, host) {
+            state.selectedHost = host;
         },
         selectService(state, name) {
             state.selectedService = name;
