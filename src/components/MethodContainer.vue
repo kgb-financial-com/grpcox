@@ -1,6 +1,7 @@
 <template>
   <div class="methodContainer">
     <Method v-for="method in methods" :key="method" :name="method"/>
+    <div v-if="!!errorMessage" class="error">{{ errorMessage }}</div>
   </div>
 </template>
 
@@ -13,7 +14,8 @@ export default {
 
   data: function() {
     return {
-      methods: []
+      methods: [],
+      errorMessage: null
     }
   },
 
@@ -31,6 +33,9 @@ export default {
   watch:{
     selectedService() {
       this.refreshMethodList();
+    },
+    selectedHost() {
+      this.refreshMethodList();
     }
   },
 
@@ -42,9 +47,10 @@ export default {
 
     refreshMethodList() {
 
-      if (!this.selectedService) {
+      if (!this.selectedService || !this.selectedHost) {
         return;
       }
+      this.errorMessage = null;
 
       axios.get(this.$store.state.urlBase + "server/" + this.selectedHost + "/service/" + this.selectedService + "/functions")
           .then(data => {
@@ -62,5 +68,11 @@ export default {
 </script>
 
 <style scoped>
+
+.error {
+  border: solid 1px;
+  padding: 10px;
+  background-color: #ffd0d0;
+}
 
 </style>

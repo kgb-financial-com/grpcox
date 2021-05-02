@@ -5,12 +5,18 @@
   <div class="hostList" v-else>
 
     <div class="flexGroup">
-      <div v-if="!!errorHostsMessage">{{ errorHostsMessage }}</div>
+      <div class="error" v-if="!!errorHostsMessage">{{ errorHostsMessage }}</div>
       <div v-else>
         <label for="hostDropDown">Host</label>
-        <select id="hostDropDown" v-model="selectedHostInList">
-          <option v-for="option in availableHosts" v-bind:value="option.value" :key="option.value">{{ option.text }}</option>
-        </select>
+        <div class="no-frame" id="hostDropDown">
+          <select v-if="availableHosts.length" v-model="selectedHostInList">
+            <option v-for="option in availableHosts" v-bind:value="option.value" :key="option.value">{{
+                option.text
+              }}
+            </option>
+          </select>
+          <div v-else class="error under-label">Please add a host.</div>
+        </div>
       </div>
       <div class="rightContainer">
         <label for="addHostGroup">Add and Select New Host</label>
@@ -24,9 +30,12 @@
 
     <div>
       <label for="serviceDropDown">Service</label>
-      <select id="serviceDropDown" v-model="selectedServiceInList">
-        <option v-for="option in currentServices" :key="option">{{ option }}</option>
-      </select>
+      <div class="no-frame" id="serviceDropDown">
+        <select v-if="currentServices.length" v-model="selectedServiceInList">
+          <option v-for="option in currentServices" :key="option">{{ option }}</option>
+        </select>
+        <div v-else class="error under-label">Please select a host.</div>
+      </div>
     </div>
 
   </div>
@@ -93,6 +102,10 @@ export default {
 
     refreshHostList(host) {
 
+      if (host.endsWith("|null")) {
+        return;
+      }
+
       axios.get(this.$store.state.urlBase + "server/" + encodeURIComponent(host) + "/services")
           .then(data => {
             if (!data?.data?.data) {
@@ -140,7 +153,7 @@ export default {
               : entry.name,
           value: entry.value
         }
-      }).sort((a,b) => a.value.localeCompare(b.value));
+      }).sort((a, b) => a.value.localeCompare(b.value));
     }
 
   }
@@ -170,6 +183,7 @@ select {
   border: none;
   padding: 0;
   display: flex;
+  margin-bottom: 0;
 }
 
 #addHostGroup {
@@ -188,6 +202,16 @@ select {
   border: solid 1px;
   padding: 10px;
   background-color: #ffd0d0;
+}
+
+.under-label {
+  margin-top: 10px;
+}
+
+.hostList div.no-frame {
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
 }
 
 </style>
