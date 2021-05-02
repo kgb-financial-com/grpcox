@@ -78,7 +78,7 @@ export default {
   },
 
   created() {
-    this.refreshHostList(this.selectedHost);
+    this.refreshHostListForCurrentHost()
   },
 
   methods: {
@@ -100,9 +100,14 @@ export default {
       this.refreshHostList(fullHostName);
     },
 
+    refreshHostListForCurrentHost() {
+      this.refreshHostList(this.selectedHost);
+    },
+
     refreshHostList(host) {
 
       if (host.endsWith("|null")) {
+        this.getActiveHostsFromServer(null, this.refreshHostListForCurrentHost);
         return;
       }
 
@@ -117,13 +122,17 @@ export default {
             this.selectedServiceInList = this.selectFirst(this.currentServices);
           })
           .catch(err => this.errorMessage = "Could not connect to server " + host.split('|')[0] + " (" + host.split('|')[1] + "): " + err)
-          .finally(() => axios.get(this.$store.state.urlBase + "active/get")
-              .then(data => {
-                this.availableHosts = this.createHostList(data.data.data);
-                this.selectedHostInList = this.selectSpecified(this.availableHosts, host);
-              })
-              .catch(err => this.errorHostsMessage = "Could not retrieve list of available hosts: " + err.errorHostsMessage)
-          )
+          .finally(() => this.getActiveHostsFromServer(host, null));
+    },
+
+    getActiveHostsFromServer(host, next) {
+      axios.get(this.$store.state.urlBase + "active/get")
+          .then(data => {
+            this.availableHosts = this.createHostList(data.data.data);
+            this.selectedHostInList = this.selectSpecified(this.availableHosts, host);
+          })
+          .catch(err => this.errorHostsMessage = "Could not retrieve list of available hosts: " + err.errorHostsMessage)
+          .finally(() => {if (next) next()});
     },
 
     createHostList(serverList) {
