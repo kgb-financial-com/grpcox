@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/gusaul/grpcox/core"
+	"github.com/kgb-financial-com/grpcox/core"
 )
 
 // Handler hold all handler methods
@@ -42,6 +42,10 @@ func (h *Handler) closeActiveConns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response(w, map[string]bool{"success": true})
+}
+
+func (h *Handler) getKnownServers(w http.ResponseWriter, r *http.Request) {
+	response(w, h.g.GetKnownServers())
 }
 
 func (h *Handler) getLists(w http.ResponseWriter, r *http.Request) {

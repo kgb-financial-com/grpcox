@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"reflect"
 	"strconv"
@@ -12,6 +13,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // GrpCox - main object
@@ -118,6 +124,43 @@ func (g *GrpCox) GetActiveConns() []string {
 		i++
 	}
 	return result
+}
+
+func (g *GrpCox) GetKnownServers() []string {
+	active := g.GetActiveConns()
+
+	// !kgb
+	namespace := os.Getenv("MYPOD_NAMESPACE")
+	fmt.Println("namespace:", namespace)
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return active
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Println(err.Error())
+		return active
+	}
+
+	labelSelector := metav1.LabelSelector{MatchLabels: map[string]string{"protocol": "grpc"}}
+	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: labels.Set(labelSelector.MatchLabels).String(),
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+		return active
+	}
+
+	fmt.Printf("Found %v grpc services: \n", len(services.Items))
+	for i := 0; i < len(services.Items); i++ {
+		fmt.Println(services.Items[i].Name)
+	}
+	fmt.Println()
+
+	return active
 }
 
 // CloseActiveConns - close conn by host or all

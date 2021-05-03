@@ -17,10 +17,9 @@ func Init(router *mux.Router) {
 	ajaxRoute.HandleFunc("/function/{func_name}/describe", corsHandler(h.describeFunction)).Methods(http.MethodGet, http.MethodOptions)
 	ajaxRoute.HandleFunc("/function/{func_name}/invoke", corsHandler(h.invokeFunction)).Methods(http.MethodPost, http.MethodOptions)
 
-	// get list of active connection
 	router.HandleFunc("/active/get", corsHandler(h.getActiveConns)).Methods(http.MethodGet, http.MethodOptions)
-	// close active connection
 	router.HandleFunc("/active/close/{host}", corsHandler(h.closeActiveConns)).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/servers/get", corsHandler(h.getKnownServers)).Methods(http.MethodGet, http.MethodOptions)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("dist/")))
 }

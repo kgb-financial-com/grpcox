@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/gusaul/grpcox/core"
-	"github.com/gusaul/grpcox/handler"
+	"github.com/kgb-financial-com/grpcox/core"
+	"github.com/kgb-financial-com/grpcox/handler"
 )
 
 func main() {

@@ -2,7 +2,6 @@ FROM golang:1.13-alpine AS builder
 
 ENV GO111MODULE=on
 
-#WORKDIR /go/src/github.com/gusaul/grpcox
 WORKDIR /src
 
 COPY . ./
