@@ -2,7 +2,7 @@
 
   <div class="error" v-if="!!errorMessage">{{ errorMessage }}</div>
 
-  <div class="hostList" v-else>
+  <div class="hostList">
 
     <div class="flexGroup">
       <div class="error" v-if="!!errorHostsMessage">{{ errorHostsMessage }}</div>
@@ -126,7 +126,7 @@ export default {
     },
 
     getActiveHostsFromServer(host, next) {
-      axios.get(this.$store.state.urlBase + "active/get")
+      axios.get(this.$store.state.urlBase + "servers/get")
           .then(data => {
             this.availableHosts = this.createHostList(data.data.data);
             this.selectedHostInList = this.selectSpecified(this.availableHosts, host);

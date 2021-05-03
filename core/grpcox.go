@@ -27,7 +27,6 @@ type GrpCox struct {
 	activeConn  *ConnStore
 	maxLifeConn time.Duration
 
-	// TODO : utilize below args
 	headers        []string
 	reflectHeaders []string
 	authority      string
@@ -127,11 +126,10 @@ func (g *GrpCox) GetActiveConns() []string {
 }
 
 func (g *GrpCox) GetKnownServers() []string {
+
 	active := g.GetActiveConns()
 
-	// !kgb
 	namespace := os.Getenv("MYPOD_NAMESPACE")
-	fmt.Println("namespace:", namespace)
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -154,13 +152,25 @@ func (g *GrpCox) GetKnownServers() []string {
 		return active
 	}
 
-	fmt.Printf("Found %v grpc services: \n", len(services.Items))
+	result := make(map[string]bool)
 	for i := 0; i < len(services.Items); i++ {
-		fmt.Println(services.Items[i].Name)
+		serviceName := services.Items[i].Name
+		entry := serviceName[:len(serviceName)-5] + "|" + serviceName + ":80"
+		result[entry] = false
 	}
-	fmt.Println()
 
-	return active
+	for i := 0; i < len(active); i++ {
+		result[active[i]] = true
+	}
+
+	resultStrings := make([]string, len(result))
+	i := 0
+	for k := range result {
+		resultStrings[i] = k
+		i++
+	}
+	return resultStrings
+
 }
 
 // CloseActiveConns - close conn by host or all
